@@ -56,10 +56,50 @@ public class Steps {
     @And("user can sort by date")
     public void userCanSortByDate() {
         resultsPage.clickOnSortByPostedDate();
+        Assert.assertTrue(resultsPage.ensureSorting());
     }
 
     @When("advanced user enters preferences in search")
     public void advancedUserEntersPreferencesInSearch() {
         searchPage.enterCustomUserChoices();
+    }
+
+    @When("advanced user enters invalid job-ref preferences in search")
+    public void advancedUserEntersInvalidJobRefPreferencesInSearch() {
+        searchPage.enterInvalidJobDetails();
+    }
+
+    @Then("user gets a message no job found")
+    public void userGetsAMessageNoJobFound() {
+        resultsPage = new ResultsPage(driver);
+        List<String> searchMsg = resultsPage.getSearchResultHeading();
+        String notFound = "No result found";
+        List<String> notFoundList = List.of(notFound.split(" "));
+        Assert.assertTrue(
+                searchMsg.stream()
+                        .anyMatch(msg -> msg.equalsIgnoreCase("No result found"))
+        );
+//        Assert.assertTrue(notFoundList.stream().anyMatch(pref ->
+//                searchMsg.stream().anyMatch(msg -> msg.contains(pref))));
+    }
+
+    @When("no jobs match my preferences")
+    public void noJobsMatchMyPreferences() {
+        searchPage.enterNonExistingTitle();
+    }
+
+    @Then("I should see a message indicating no results were found")
+    public void iShouldSeeAMessageIndicatingNoResultsWereFound() {
+        resultsPage = new ResultsPage(driver);
+        List<String> searchMsg = resultsPage.getSearchResultHeading();
+        List<String> userPrefs = searchPage.getUserPreferences();
+
+        boolean matchFound = userPrefs.stream()
+                .anyMatch(pref ->
+                        searchMsg.stream().anyMatch(msg -> msg.contains(pref))
+                );
+
+        Assert.assertFalse(
+                "None of the user preferences were found in search results",matchFound);
     }
 }

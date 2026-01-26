@@ -32,7 +32,11 @@ public class SearchPage extends BaseSetup {
     String userPreferredLocation = getProperties().getProperty("userPreferredLocation");
     String userPreferredJobRef = getProperties().getProperty("userJobRef");
     String userPreferredEmployer = getProperties().getProperty("userPreferredEmployer");
-
+    String invalidJobRef = getProperties().getProperty("invalidJobRef");
+    String invalidJobTitle = getProperties().getProperty("invalidJobTitle");
+    String invalidJobLocation = getProperties().getProperty("invalidJobLocation");
+    String invalidEmployer = getProperties().getProperty("invalidEmployer");
+    String nonExistingJobTitle = getProperties().getProperty("nonExistingJobTitle");
     //export user preferred values for advanced search for assertion
     public List<String> getUserPreferences(){
         List<String> userPreferences = List.of(userJobTitle, userPreferredLocation,userPreferredJobRef,userPreferredEmployer);
@@ -81,6 +85,35 @@ public class SearchPage extends BaseSetup {
             jobReference.sendKeys(userPreferredJobRef);
         if(userPreferredEmployer!=null)
             employer.sendKeys(userPreferredEmployer);
+        searchBtn.click();
+    }
+
+    public void enterInvalidJobDetails(){
+        moreSearchOptionsBtn = driver.findElement(By.id(getProperties().getProperty("moreSearchOptionsBtnId")));
+        jobReference = driver.findElement(By.id(getProperties().getProperty("jobRefElementId")));
+        employer = driver.findElement(By.id(getProperties().getProperty("employerElementId")));
+        title = driver.findElement(By.id(getProperties().getProperty("titleElementId")));
+        location = driver.findElement(By.id(getProperties().getProperty("locationElementId")));
+        searchBtn = driver.findElement(By.id(getProperties().getProperty("searchBtnId")));
+        JavascriptExecutor jse = (JavascriptExecutor) driver;
+        jse.executeScript("arguments[0].scrollIntoView();",moreSearchOptionsBtn);
+        moreSearchOptionsBtn.click();
+        if(invalidJobTitle!=null)
+            title.sendKeys(invalidJobTitle);
+        if(invalidJobLocation!=null)
+            location.sendKeys(invalidJobLocation);
+        if(invalidJobRef!=null)
+            jobReference.sendKeys(invalidJobRef);
+        if(invalidEmployer!=null)
+            employer.sendKeys(invalidEmployer);
+        searchBtn.click();
+    }
+
+    public void enterNonExistingTitle(){
+        title = driver.findElement(By.id(getProperties().getProperty("titleElementId")));
+        searchBtn = driver.findElement(By.id(getProperties().getProperty("searchBtnId")));
+        if(nonExistingJobTitle!=null)
+            title.sendKeys(nonExistingJobTitle);
         searchBtn.click();
     }
 }

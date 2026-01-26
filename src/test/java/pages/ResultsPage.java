@@ -22,7 +22,7 @@ public class ResultsPage {
 
     WebElement declineCookies ;
     WebElement sortBtn ;
-
+    String searchResultHeading;
 
     public void denyCookies(){
         declineCookies = driver.findElement(By.id(getProperties().getProperty("rejectCookiesBtnId")));
@@ -33,43 +33,46 @@ public class ResultsPage {
         WebElement searchHeading = driver.findElement(By.id(getProperties().getProperty("searchResultsHeadingElementId")));
         JavascriptExecutor jse = (JavascriptExecutor) driver;
         jse.executeScript("arguments[0].scrollIntoView();",searchHeading);
-        String searchResultHeading = searchHeading.getAttribute("aria-label");
+        searchResultHeading = searchHeading.getAttribute("aria-label");
+        if(searchResultHeading.isEmpty()){
+            WebElement searchResultQuery = driver.findElement(By.xpath("//h2[@data-test=\"search-result-query\"]"));
+            String searchResultQueryMsg = searchResultQuery.getText();
+            return List.of(searchResultQueryMsg.split(" "));
+        }
         return List.of(searchResultHeading.split(" "));
     }
 
     public void clickOnSortByPostedDate(){
-
-        sortBtn = driver.findElement(By.id(getProperties().getProperty("sortBtnId")));
-        sortBtn.click();
-        Select sortItems = new Select(sortBtn);
-        List<WebElement> sortList = sortItems.getOptions();
-        for(WebElement item: sortList){
-            if(item.getText().equalsIgnoreCase("Date Posted (newest)"))
-                item.click();
+        if(!searchResultHeading.contains("No result found")) {
+            sortBtn = driver.findElement(By.id(getProperties().getProperty("sortBtnId")));
+            sortBtn.click();
+            Select sortItems = new Select(sortBtn);
+            sortItems.selectByVisibleText("Date Posted (newest)");
         }
-
     }
 
-    public void ensureSorting(){
+    public boolean ensureSorting(){
         List<WebElement> listOfPublicationDates = driver.findElements(By.xpath(getProperties().getProperty("publicationDatesXpath")));
         DateTimeFormatter formatter =
                 DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.ENGLISH);
         LocalDate firstDate = null;
+
         for(WebElement e:listOfPublicationDates){
             String cleanedText = e.getText().trim().replaceAll("\\s+", " ");
             LocalDate currentDate = LocalDate.parse(cleanedText, formatter);
 
             if (firstDate == null) {
                 firstDate = currentDate;
-                System.out.println("First date: " + firstDate);
+                //System.out.println("First date: " + firstDate);
                 continue;
             }
 
             if (currentDate.isBefore(firstDate)) {
-                System.out.println("Found earlier date: " + currentDate);
-                break;
+                //System.out.println("Found earlier date: " + currentDate);
+                return true;
             }
         }
+        return false;
     }
 
 }
