@@ -7,8 +7,9 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.PageFactory;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-
 import static utils.DriverFactory.*;
 
 public class SearchPage extends BaseSetup {
@@ -54,13 +55,57 @@ public class SearchPage extends BaseSetup {
         jse.executeScript("arguments[0].scrollIntoView();",title);
         title.sendKeys(userJobTitle);
         location.sendKeys(userPreferredLocation);
-        searchBtn.click();
     }
 
-    //clear all filters
+    //clear all filters - when you clear all filters you should verify all the fields have blank
+    // or default values
     public void clearFilters(){
         clearFilterBtn = driver.findElement(By.id(getProperties().getProperty("clearFilterBtnId")));
         clearFilterBtn.click();
+    }
+
+    public void typeTitleAndLocation(){
+        List<WebElement> titleAndLocation = getBasicElements();
+        for (WebElement element:titleAndLocation)
+            element.sendKeys("-");
+    }
+    public void typeLocation(String myLocation){
+        location = driver.findElement(By.id(getProperties().getProperty("locationElementId")));
+        location.sendKeys(myLocation);
+    }
+    public List<WebElement> getBasicElements(){
+        title = driver.findElement(By.id(getProperties().getProperty("titleElementId")));
+        location = driver.findElement(By.id(getProperties().getProperty("locationElementId")));
+        return List.of(title, location);}
+
+    public List<WebElement> getAdvancedElements(){
+        jobReference = driver.findElement(By.id(getProperties().getProperty("jobRefElementId")));
+        employer = driver.findElement(By.id(getProperties().getProperty("employerElementId")));
+        //payRange = driver.findElement(By.id(getProperties().getProperty("payRange")));
+        return List.of(jobReference, employer);}
+
+    //get current values or default values in the fields
+    public List<String> getCurrentValues(){
+        //method call to get basic fields as List<WebElements>
+        List<WebElement> basicElements = getBasicElements();
+        //method call to get advanced fields List<WebElements>-only if element with id=additionalSearchPanel is visible or
+        // element with id=searchOptionsBtn containing "Fewer search options" text is visible
+        List<WebElement> advancedElements= Collections.emptyList();
+        if(driver.findElement(By.id("searchOptionsBtn")).isDisplayed()
+                && driver.findElement(By.id("searchOptionsBtn"))
+                .getText().contains("Fewer search options")){
+            advancedElements = getAdvancedElements();
+        }
+        //store current values of basic fields in a hash-map with element as key and value as current value
+        List<String> currentValues = new ArrayList<>();
+        for (WebElement element : basicElements) {
+            currentValues.add(element.getAttribute("value"));
+        }
+
+        for (WebElement element : advancedElements) {
+            currentValues.add(element.getAttribute("value"));
+        }
+        return currentValues;
     }
 
     //MORE OPTIONS SEARCH: type job-title or/and location or/and job ref or/and employer name
@@ -85,7 +130,6 @@ public class SearchPage extends BaseSetup {
             jobReference.sendKeys(userPreferredJobRef);
         if(userPreferredEmployer!=null)
             employer.sendKeys(userPreferredEmployer);
-        searchBtn.click();
     }
 
     public void enterInvalidJobDetails(){
@@ -106,7 +150,6 @@ public class SearchPage extends BaseSetup {
             jobReference.sendKeys(invalidJobRef);
         if(invalidEmployer!=null)
             employer.sendKeys(invalidEmployer);
-        searchBtn.click();
     }
 
     public void enterNonExistingTitle(){
@@ -114,6 +157,10 @@ public class SearchPage extends BaseSetup {
         searchBtn = driver.findElement(By.id(getProperties().getProperty("searchBtnId")));
         if(nonExistingJobTitle!=null)
             title.sendKeys(nonExistingJobTitle);
+
+    }
+
+    public void clickOnSearch() {
         searchBtn.click();
     }
 }
