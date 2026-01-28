@@ -6,7 +6,10 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -14,9 +17,11 @@ import static utils.DriverFactory.*;
 
 public class SearchPage extends BaseSetup {
     WebDriver driver;
+    private static WebDriverWait wait;
     public SearchPage(WebDriver driver) {
         this.driver = driver;
         PageFactory.initElements(driver, this);
+        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
     }
 
     WebElement title ;
@@ -121,7 +126,7 @@ public class SearchPage extends BaseSetup {
         searchBtn = driver.findElement(By.id(getProperties().getProperty("searchBtnId")));
         JavascriptExecutor jse = (JavascriptExecutor) driver;
         jse.executeScript("arguments[0].scrollIntoView();",moreSearchOptionsBtn);
-        moreSearchOptionsBtn.click();
+        clickOnMoreSearchBtn();
         if(userJobTitle!=null)
             title.sendKeys(userJobTitle);
         if(userPreferredLocation!=null)
@@ -141,7 +146,7 @@ public class SearchPage extends BaseSetup {
         searchBtn = driver.findElement(By.id(getProperties().getProperty("searchBtnId")));
         JavascriptExecutor jse = (JavascriptExecutor) driver;
         jse.executeScript("arguments[0].scrollIntoView();",moreSearchOptionsBtn);
-        moreSearchOptionsBtn.click();
+        clickOnMoreSearchBtn();
         if(invalidJobTitle!=null)
             title.sendKeys(invalidJobTitle);
         if(invalidJobLocation!=null)
@@ -161,6 +166,10 @@ public class SearchPage extends BaseSetup {
     }
 
     public void clickOnSearch() {
-        searchBtn.click();
+        driver.findElement(By.id(getProperties().getProperty("searchBtnId"))).click();
+    }
+
+    public static void clickOnMoreSearchBtn(){
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(getProperties().getProperty("moreSearchOptionsBtnId")))).click();
     }
 }

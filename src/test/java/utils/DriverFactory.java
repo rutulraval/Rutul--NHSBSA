@@ -39,16 +39,6 @@ public class DriverFactory {
     }
 
     public WebDriver getDriver() {
-
-//        if (properties.getProperty("browser").equalsIgnoreCase("chrome") || driver == null) {
-//            WebDriverManager.chromedriver().setup();
-//            driver = new ChromeDriver();
-//            driver.manage().window().maximize();
-//        } else if (properties.getProperty("browser").equalsIgnoreCase("firefox")) {
-//            WebDriverManager.firefoxdriver().setup();
-//            driver = new FirefoxDriver();
-//            driver.manage().window().maximize();
-//        }
         return driver;
     }
 
