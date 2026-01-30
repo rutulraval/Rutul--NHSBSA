@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import static utils.DriverFactory.getLink;
 import static utils.DriverFactory.getProperties;
@@ -191,6 +193,7 @@ public class Steps {
         System.out.println(actual);
         Assert.assertTrue(actual.containsAll(expected));
     }
+    @When("I click on the More search options")
     @And("I click on More search options")
     public void iClickOnMoreSearchOptions() {
         driver.findElement(By.id(getProperties().getProperty("moreSearchOptionsBtnId"))).click();
@@ -246,6 +249,29 @@ public class Steps {
         Assert.assertTrue("Could not find desired suggestion: " + desiredText, selected);
     }
 
+    @When("I click on the More search options link")
+    public void iClickOnMoreSearchOptionsLink() {
+        driver.findElement(By.id(getProperties().getProperty("moreSearchOptionsBtnId"))).click();
+    }
+    @Then("the What field should display hint text {string}")
+    public void theWhatFieldShouldDisplayHintText(String expected) {
+        WebElement hint = driver.findElement(By.id("keyword-hint"));
+        Assert.assertEquals(expected, hint.getText().trim());
+    }
+
+    @And("the Distance dropdown should be disabled with {string} selected by default")
+    public void theDistanceDropdownShouldBeDisabledWithSelectedByDefault(String expected) {
+        WebElement dropdown = driver.findElement(By.id("distance"));
+        Assert.assertFalse(dropdown.isEnabled());
+        Assert.assertEquals(expected, new Select(dropdown).getFirstSelectedOption().getText());
+    }
+
+    @And("the Pay Range dropdown should have {string} option selected by default")
+    public void thePayRangeDropdownShouldHaveOptionSelectedByDefault(String expected) {
+        WebElement dropdown = driver.findElement(By.id("payRange"));
+        Assert.assertEquals(expected, new Select(dropdown).getFirstSelectedOption().getText());
+    }
+
     @After
     public void tearDown() {
         WebDriver driver = driverFactory.getDriver();
@@ -253,5 +279,122 @@ public class Steps {
             driver.quit();
             DriverFactory.quitDriver();
         }
+    }
+
+    @When("I enter job title {string}")
+    public void iEnterJobTitle(String jobTitle) {
+        WebElement input = wait.until(ExpectedConditions.elementToBeClickable(By.id("keyword")));
+        input.clear();
+        input.sendKeys(jobTitle);
+    }
+
+    @And("I select {string} in the Distance dropdown")
+    public void iSelectInTheDistanceDropdown(String value) {
+        WebElement dropdown = wait.until(ExpectedConditions.elementToBeClickable(By.id("distance")));
+        new Select(dropdown).selectByVisibleText(value);
+    }
+
+    @And("I enter job reference {string}")
+    public void iEnterJobReference(String ref) {
+        if (!ref.isEmpty()) {
+            WebElement input = wait.until(ExpectedConditions.elementToBeClickable(By.id("jobReference")));
+            input.clear();
+            input.sendKeys(ref);
+        }
+    }
+
+    @And("I enter employer {string}")
+    public void iEnterEmployer(String employer) {
+        if (!employer.isEmpty()) {
+            WebElement input = wait.until(ExpectedConditions.elementToBeClickable(By.id("employer")));
+            input.clear();
+            input.sendKeys(employer);
+        }
+    }
+
+    @And("I select {string} from the Pay Range dropdown")
+    public void iSelectFromThePayRangeDropdown(String payRange) {
+        WebElement dropdown = wait.until(ExpectedConditions.elementToBeClickable(By.id("payRange")));
+//        WebElement dropdown = driver.findElement(By.id("payRange"));
+        new Select(dropdown).selectByVisibleText(payRange);
+    }
+
+
+    @And("I click on the Search button")
+    public void iClickOnTheSearchButton() {
+        searchPage.clickOnSearch();
+    }
+
+    @Then("the sort by dropdown should have {string} selected")
+    @And("the sort by dropdown should have {string} selected by default")
+    public void theSortByDropdownShouldHaveSelectedByDefault(String expected) {
+        WebElement dropdown = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("sort")));
+        Select select = new Select(dropdown);
+        Assert.assertEquals(expected, select.getFirstSelectedOption().getText());
+    }
+
+    @When("I select {string} from the sort by dropdown")
+    public void iSelectFromTheSortByDropdown(String option) {
+        Select select = new Select(wait.until(ExpectedConditions.elementToBeClickable(By.id("sort"))));
+        select.selectByVisibleText(option);
+    }
+
+    @Then("the Job Title field should contain {string}")
+    public void theJobTitleFieldShouldContain(String expected) {
+        Assert.assertEquals(expected, driver.findElement(By.id("keyword")).getAttribute("value"));
+    }
+
+    @And("the Location field should contain {string}")
+    public void theLocationFieldShouldContain(String expected) {
+        Assert.assertEquals(expected, driver.findElement(By.id("location")).getAttribute("value"));
+    }
+
+    @And("the Job Reference field should contain {string}")
+    public void theJobReferenceFieldShouldContain(String expected) {
+        Assert.assertEquals(expected, driver.findElement(By.id("jobReference")).getAttribute("value"));
+    }
+
+    @And("the Employer field should contain {string}")
+    public void theEmployerFieldShouldContain(String expected) {
+        Assert.assertEquals(expected, driver.findElement(By.id("employer")).getAttribute("value"));
+    }
+
+    @Then("I should see error message {string}")
+    public void iShouldSeeErrorMessage(String expected) {
+        List<By> locators = List.of(
+                By.id("no-result-title"),                                      // For "No result found"
+                By.cssSelector("h2[data-test='search-result-query']")          // For "Location not found"
+        );
+
+        boolean found = false;
+        for (By locator : locators) {
+            try {
+                WebElement msg = wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
+                String actualMessage = msg.getText().trim();
+                if (actualMessage.equalsIgnoreCase(expected)) {
+                    found = true;
+                    break;
+                }
+            } catch (TimeoutException ignored) {
+                // Continue trying other locators
+            }
+        }
+        Assert.assertTrue("Expected error message not found: " + expected, found);
+    }
+
+    @And("I should see all available job results")
+    public void iShouldSeeAllAvailableJobResults() {
+        WebElement heading = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("search-results-heading")));
+        Matcher matcher = Pattern.compile("(\\d+)\\s+jobs found").matcher(heading.getText());
+        Assert.assertTrue("No job count found", matcher.find());
+        int count = Integer.parseInt(matcher.group(1));
+        Assert.assertTrue("Expected jobs but found none", count > 0);
+    }
+
+    @Then("I should see no suggestions")
+    public void iShouldSeeNoSuggestions() {
+        List<WebElement> emptySuggestions = driver.findElements(By.cssSelector("#location__listbox li"));
+        Assert.assertEquals("Expected no suggestions, but some were found", 0, emptySuggestions.size());
+
     }
 }
