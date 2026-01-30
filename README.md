@@ -104,11 +104,11 @@ Firefox
 
 | Scenario Type | Command |
 |--------------|---------|
-| Happy path only | `mvn clean test -Dcucumber.filter.tags=@happy -Dbrowser=chrome` |
-| UI validations | `mvn clean test -Dcucumber.filter.tags=@ui -Dbrowser=chrome` |
-| Negative tests | `mvn clean test -Dcucumber.filter.tags=@unhappy -Dbrowser=chrome` |
-| Happy + UI | `mvn clean test -Dcucumber.filter.tags="@happy or @ui" -Dbrowser=chrome` |
-| All tests | `mvn clean test -Dcucumber.filter.tags="@happy or @ui or @unhappy" -Dbrowser=chrome` |
+| Happy path only | `mvn clean test "-Dcucumber.filter.tags=@happy" "-Dbrowser=chrome"` |
+| UI validations | `mvn clean test "-Dcucumber.filter.tags=@ui" "-Dbrowser=chrome"` |
+| Negative tests | `mvn clean test "-Dcucumber.filter.tags=@unhappy" "-Dbrowser=chrome"` |
+| Happy + UI | `mvn clean test "-Dcucumber.filter.tags=@happy or @ui" "-Dbrowser=chrome"` |
+| All tests | `mvn clean test "-Dcucumber.filter.tags=@happy or @ui or @unhappy" "-Dbrowser=chrome"` |
 
 > Replace `chrome` with `firefox` as needed.
 
