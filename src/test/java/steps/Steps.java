@@ -54,9 +54,7 @@ public class Steps {
     @Then("user gets a list of jobs for preferred parameters")
     public void userGetsAListOfJobsForPreferredParameters() {
         resultsPage = new ResultsPage(driver);
-        //resultsPage.denyCookies();
         List<String> searchMsg = resultsPage.getSearchResultHeading();
-        //Assert.assertTrue(searchMsg.contains(searchPage.getUserPreferences().iterator().toString()));
         List<String> userPrefs = searchPage.getUserPreferences();
 
         boolean matchFound = userPrefs.stream()
@@ -183,6 +181,7 @@ public class Steps {
     public void wait_for_results() {
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("sort")));
     }
+
     @Then("the sort by dropdown should contain the following options:")
     public void sort_by_options(io.cucumber.datatable.DataTable dataTable) {
         List<String> expected = dataTable.asList();
@@ -195,8 +194,6 @@ public class Steps {
     @And("I click on More search options")
     public void iClickOnMoreSearchOptions() {
         driver.findElement(By.id(getProperties().getProperty("moreSearchOptionsBtnId"))).click();
-//        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(getProperties().getProperty("moreSearchOptionsBtnId")))).click();
-        //SearchPage.clickOnMoreSearchBtn();
         searchPage.clickOnSearch();
     }
 
@@ -233,8 +230,6 @@ public class Steps {
             Assert.assertTrue("Suggestion '" + text + "' does not contain: " + input,
                     text.toLowerCase().contains(input.toLowerCase()));
         }
-
-        
     }
 
     @And("I select {string} from the suggestions")

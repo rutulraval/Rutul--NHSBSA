@@ -4,8 +4,11 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -15,22 +18,17 @@ import static utils.DriverFactory.getProperties;
 
 public class ResultsPage {
     WebDriver driver;
-    public ResultsPage(WebDriver driver) {
-        this.driver = driver;
-//        PageFactory.initElements(driver, this);
-    }
-
-    WebElement declineCookies ;
     WebElement sortBtn ;
     String searchResultHeading;
 
-    public void denyCookies(){
-        declineCookies = driver.findElement(By.id(getProperties().getProperty("rejectCookiesBtnId")));
-        declineCookies.click();
+    private static WebDriverWait wait;
+    public ResultsPage(WebDriver driver) {
+        this.driver = driver;
+        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
     }
 
     public List<String> getSearchResultHeading(){
-        WebElement searchHeading = driver.findElement(By.id(getProperties().getProperty("searchResultsHeadingElementId")));
+        WebElement searchHeading =wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(getProperties().getProperty("searchResultsHeadingElementId"))));
         JavascriptExecutor jse = (JavascriptExecutor) driver;
         jse.executeScript("arguments[0].scrollIntoView();",searchHeading);
         searchResultHeading = searchHeading.getAttribute("aria-label");
@@ -63,12 +61,10 @@ public class ResultsPage {
 
             if (firstDate == null) {
                 firstDate = currentDate;
-                //System.out.println("First date: " + firstDate);
                 continue;
             }
 
             if (currentDate.isBefore(firstDate)) {
-                //System.out.println("Found earlier date: " + currentDate);
                 return true;
             }
         }

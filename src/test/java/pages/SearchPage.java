@@ -1,6 +1,4 @@
 package pages;
-
-import base.BaseSetup;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -15,7 +13,8 @@ import java.util.Collections;
 import java.util.List;
 import static utils.DriverFactory.*;
 
-public class SearchPage extends BaseSetup {
+//public class SearchPage extends BaseSetup {
+public class SearchPage{
     WebDriver driver;
     private static WebDriverWait wait;
     public SearchPage(WebDriver driver) {
@@ -31,7 +30,7 @@ public class SearchPage extends BaseSetup {
     WebElement moreSearchOptionsBtn;
     WebElement jobReference;
     WebElement employer ;
-    WebElement payRange ;
+    //WebElement payRange ;
 
     // Get values from properties file
     String userJobTitle = getProperties().getProperty("userJobTitle");
